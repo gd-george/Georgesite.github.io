@@ -1,7 +1,107 @@
 <!DOCTYPE html>
-<html> 
-<head> 
-    <title>Home Questionnaire</title> 
+<html>
+<head>
+    <title>Home Questionnaire</title>
+
+    <!-- Include some basic styles for the form -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            max-width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+        }
+
+        p {
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border 0.3s ease-in-out;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus {
+            border-color: #0066cc;
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #005bb5;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
 
     <script>
       !function(){
@@ -44,32 +144,43 @@
             analytics.page();
         }
       }();
-    </script> 
+    </script>
 
-</head> 
-<body> 
-    <h1>What is your favorite place to travel?</h1> 
-    <p>I am building a directory of the sweetest travel destinations.</p>  
+</head>
+<body>
 
-    <form name="travel" id="travelForm">
-        <label for="destination">What is your favorite travel destination?</label>
-        <input name="destination" id="destination" required size="81" type="text" /> 
-        <br><br> 
+    <div class="container">
+        <h1>What is your favorite place to travel?</h1>
+        <p>I am building a directory of the sweetest travel destinations.</p>
 
-        <label for="details">Any recommendations (cool things to do, places to visit, or restaurants to eat)?</label>
-        <textarea name="details" id="details" required rows="10" cols="81"></textarea> 
-        <br><br>
+        <form name="travel" id="travelForm">
+            <div class="form-group">
+                <label for="destination">What is your favorite travel destination?</label>
+                <input name="destination" id="destination" required size="81" type="text" />
+            </div>
 
-        <label for="fullname">Name:</label>
-        <input name="fullname" id="fullname" required size="75" type="text" /> 
-        <br><br> 
+            <div class="form-group">
+                <label for="details">Any recommendations (cool things to do, places to visit, or restaurants to eat)?</label>
+                <textarea name="details" id="details" required rows="10" cols="81"></textarea>
+            </div>
 
-        <label for="email">Email:</label>
-        <input name="email" id="email" required size="75" type="email" /> 
-        <br><br>
+            <div class="form-group">
+                <label for="fullname">Name:</label>
+                <input name="fullname" id="fullname" required size="75" type="text" />
+            </div>
 
-        <input name="submit" type="submit" value="Submit" />
-    </form> 
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input name="email" id="email" required size="75" type="email" />
+            </div>
+
+            <input name="submit" type="submit" value="Submit" />
+        </form>
+
+        <div class="form-footer">
+            <p>Thank you for sharing your favorite destination!</p>
+        </div>
+    </div>
 
     <script>
         document.getElementById('travelForm').addEventListener('submit', function(e) {
@@ -104,5 +215,5 @@
         });
     </script>
 
-</body> 
+</body>
 </html>
