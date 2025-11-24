@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>George’s Fitness & Food Coach</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #050816;
+      color: #e5e7eb;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.15);
+      --card-bg: #0b1020;
+      --border: #1f2937;
+      --danger: #f97373;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 500px;
+      padding: 16px 12px 32px;
+    }
+
+    header { margin-bottom: 12px; }
+
+    header h1 {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #020617;
+      color: #9ca3af;
+    }
+
+    .badge.accent {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: #bbf7d0;
+    }
+
+    .today-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+
+    .reset-btn {
+      font-size: 0.75rem;
+      background: transparent;
+      border: none;
+      color: #6b7280;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .week-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .week-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .week-button {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #020617;
+      color: #e5e7eb;
+      padding: 2px 8px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+
+    .week-button:active {
+      transform: translateY(1px);
+    }
+
+    .plan-label {
+      font-size: 0.78rem;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+
+    .tabs {
+      display: flex;
+      margin: 10px 0 16px;
+      border-radius: 999px;
+      padding: 4px;
+      background: #020617;
+      border: 1px solid var(--border);
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px 0;
+      font-size: 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #9ca3af;
+    }
+
+    .tab.active {
+      background: var(--accent-soft);
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .pill {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      border: 1px solid var(--border);
+      background: #020617;
+      color: #9ca3af;
+      max-width: 100%;
+    }
+
+    .pill.done {
+      border-color: var(--accent);
+      color: #a7f3d0;
+    }
+
+    .current-card {
+      border-radius: 16px;
+      padding: 14px 14px 12px;
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.18), #020617 45%);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      margin-bottom: 12px;
+    }
+
+    .current-card h2 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .current-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: #9ca3af;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      background: var(--accent);
+      color: #022c22;
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.25);
+    }
+
+    .btn.secondary {
+      background: #020617;
+      color: #e5e7eb;
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+    }
+
+    .next-card {
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #020617;
+      border: 1px dashed var(--border);
+    }
+
+    .next-card h3 {
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+
+    .small-text {
+      font-size: 0.78rem;
+      color: #9ca3af;
+    }
+
+    .empty-state {
+      padding: 16px 12px;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+      text-align: center;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #020617;
+      border: 1px solid var(--border);
+      color: #9ca3af;
+    }
+
+    .tag.good { border-color: var(--accent); color: #bbf7d0; }
+    .tag.bad { border-color: var(--danger); color: #fecaca; }
+
+    .cheat-summary {
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      color: #9ca3af;
+    }
+
+    .cheat-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .cheat-list {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .cheat-list ul {
+      margin-left: 16px;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>George’s Daily Coach</h1>
+      <p>Low-BMI friendly plan • One day at a time 💪</p>
+      <div class="badge-row">
+        <div class="badge accent">Low BMI Mode</div>
+        <div class="badge">Goal: 62 kg</div>
+        <div class="badge">Ragi + High Calorie</div>
+      </div>
+    </header>
+
+    <div class="today-row">
+      <span id="todayText"></span>
+      <button class="reset-btn" id="resetDayBtn">Reset today</button>
+    </div>
+
+    <div class="week-row">
+      <span id="weekText"></span>
+      <div class="week-controls">
+        <button class="week-button" id="decWeekBtn">− Week</button>
+        <button class="week-button" id="incWeekBtn">+ Week</button>
+      </div>
+    </div>
+
+    <div class="plan-label" id="planLabel"></div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="workout">Workout</button>
+      <button class="tab" data-tab="meals">Meals</button>
+      <button class="tab" data-tab="cheats">Cheats</button>
+    </div>
+
+    <div id="content"></div>
+  </div>
+
+  <script>
+    const STORAGE_KEY_STATE = "george_daily_state_v3_lowbmi";
+    const STORAGE_KEY_CHEATS = "george_cheats_log_v1";
+    const MIN_WEEK = 1;
+    const MAX_WEEK = 6;
+
+    function getTodayKey() {
+      const today = new Date();
+      return today.toISOString().slice(0, 10); // YYYY-MM-DD
+    }
+
+    function formatToday() {
+      const d = new Date();
+      const opts = { weekday: "short", day: "numeric", month: "short" };
+      return d.toLocaleDateString(undefined, opts);
+    }
+
+    function getDayInfo(date = new Date()) {
+      const dayIndex = date.getDay(); // 0 = Sun, 1 = Mon, ... 6 = Sat
+      const weekdayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const name = weekdayNames[dayIndex];
+
+      // Training days:
+      // Mon = Push, Tue = Pull, Thu = Legs, Sat = Full Body
+      let type = "Rest";
+      let label = `${name} • Recovery Day`;
+
+      if (dayIndex === 1) {
+        type = "Push";
+        label = "Monday • Day 1 – Push (Chest/Shoulders/Triceps + Tech Neck)";
+      } else if (dayIndex === 2) {
+        type = "Pull";
+        label = "Tuesday • Day 2 – Pull (Back/Biceps + Posture)";
+      } else if (dayIndex === 4) {
+        type = "Legs";
+        label = "Thursday • Day 3 – Legs + Calves + Core";
+      } else if (dayIndex === 6) {
+        type = "FullBody";
+        label = "Saturday • Day 4 – Full Body + Core";
+      }
+
+      const isTraining = ["Push", "Pull", "Legs", "FullBody"].includes(type);
+      return { dayIndex, name, type, label, isTraining };
+    }
+
+    // Week helpers
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY_STATE);
+      const todayKey = getTodayKey();
+      const defaultWeek = 1;
+
+      if (!raw) {
+        const defaults = getDefaultsForToday(defaultWeek);
+        return {
+          date: todayKey,
+          week: defaultWeek,
+          workout: defaults.workout,
+          meals: defaults.meals
+        };
+      }
+
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        localStorage.removeItem(STORAGE_KEY_STATE);
+        return loadState();
+      }
+
+      if (typeof data.week !== "number") {
+        data.week = defaultWeek;
+      }
+
+      // If day changed, regenerate tasks for that day & current week
+      if (data.date !== todayKey) {
+        const defaults = getDefaultsForToday(data.week);
+        return {
+          date: todayKey,
+          week: data.week,
+          workout: defaults.workout,
+          meals: defaults.meals
+        };
+      }
+
+      return data;
+    }
+
+    function saveState(state) {
+      localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(state));
+    }
+
+    // Cheat log: { [dateKey]: true/false }
+    function loadCheatLog() {
+      const raw = localStorage.getItem(STORAGE_KEY_CHEATS);
+      if (!raw) return {};
+      try {
+        return JSON.parse(raw) || {};
+      } catch {
+        localStorage.removeItem(STORAGE_KEY_CHEATS);
+        return {};
+      }
+    }
+
+    function saveCheatLog(log) {
+      localStorage.setItem(STORAGE_KEY_CHEATS, JSON.stringify(log));
+    }
+
+    function getYearWeekString(date = new Date()) {
+      // Rough ISO-like week number
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+      return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
+    }
+
+    function countCheatsThisWeek(log) {
+      const weekId = getYearWeekString();
+      let count = 0;
+      for (const [dateKey, used] of Object.entries(log)) {
+        if (!used) continue;
+        const d = new Date(dateKey);
+        if (getYearWeekString(d) === weekId) count++;
+      }
+      return count;
+    }
+
+    // ---- PLAN LOGIC ----
+
+    function makeTasksFromArray(arr) {
+      return arr.map(text => ({ text, done: false }));
+    }
+
+    function getWorkoutTasksForDay(week, dayType) {
+      const phase =
+        week <= 2 ? "base" :
+        week <= 4 ? "progress" : "strength";
+
+      // Base program (Weeks 1–2)
+      if (phase === "base") {
+        if (dayType === "Push") {
+          return [
+            "Warm-up (5 min): cat-cow, neck mobility, shoulder circles",
+            "Tech-neck: 2×12 chin tucks + 2×10 wall angels",
+            "Push-ups: 3 × 5 (perfect form, not to failure)",
+            "Incline push-ups on bench: 2 × 8 (use higher surface if hard)",
+            "Pike lean (not full push-up): 2 × 8",
+            "Bench dips: 2 × 8",
+            "Cool down: chest + shoulder stretch 5 min"
+          ];
+        }
+        if (dayType === "Pull") {
+          return [
+            "Warm-up (3–5 min): arm swings + 5 scapular pull-ups",
+            "Pull-ups: 3 × 2 (clean reps only)",
+            "Assisted pull-ups with chair: 2 × 4",
+            "Australian rows under table: 3 × 8",
+            "Dumbbell rows (4kg): 2 × 10 each side",
+            "Bicep curls (4kg): 2 × 12",
+            "YT-W raises on floor: 2 × 10 (posture)",
+            "Neck retractions at wall: 2 × 10",
+            "Cool down: back + forearm stretch"
+          ];
+        }
+        if (dayType === "Legs") {
+          return [
+            "Warm-up (5 min): ankle circles, hip openers, light squats",
+            "Split squats (bench support): 3 × 6 each leg",
+            "Bench step-ups: 3 × 8 each leg",
+            "Glute bridges: 3 × 10",
+            "Standing calf raises (slow): 3 × 12",
+            "Seated calf raises (4kg on knees): 2 × 10",
+            "Tip-toe hold: 2 × 15 sec",
+            "Core: plank 20 sec + dead bug 2 × 8",
+            "Cool down: quad, hamstring, calf stretch"
+          ];
+        }
+        if (dayType === "FullBody") {
+          return [
+            "Warm-up (5 min): full body mobility + neck",
+            "Push-ups: 2 × 5",
+            "Pull-ups: 2 × 2 (easy, not max)",
+            "Dumbbell thrusters (4kg): 2 × 10",
+            "Bench dips: 1 × 8",
+            "Core: plank 20 sec",
+            "Core: dead bug 2 × 8",
+            "Tech-neck: chin tucks + wall angels (5 min)",
+            "Cool down: stretch"
+          ];
+        }
+      }
+
+      // Progress phase (Weeks 3–4)
+      if (phase === "progress") {
+        if (dayType === "Push") {
+          return [
+            "Warm-up (5 min): cat-cow, neck, shoulders",
+            "Push-ups: 3 × 6 (clean reps only)",
+            "Incline push-ups: 2 × 10",
+            "Pike lean: 2 × 10",
+            "Bench dips: 3 × 8",
+            "Tech-neck: 2×15 chin tucks + wall angels",
+            "Cool down: chest + shoulder stretch"
+          ];
+        }
+        if (dayType === "Pull") {
+          return [
+            "Warm-up: arm swings, scapular pull-ups × 5",
+            "Pull-ups: 3 × 2–3",
+            "Assisted pull-ups: 2 × 5",
+            "Australian rows: 3 × 10",
+            "Dumbbell rows: 2 × 12 each side",
+            "Bicep curls: 2 × 12–14",
+            "YT-W raises: 2 × 10",
+            "Cool down: lats + forearm stretch"
+          ];
+        }
+        if (dayType === "Legs") {
+          return [
+            "Warm-up (5 min): ankle, hip, light squats",
+            "Split squats: 3 × 8 each leg",
+            "Step-ups: 3 × 10 each leg",
+            "Glute bridges: 3 × 12",
+            "Standing calf raises: 4 × 15",
+            "Seated calf raises: 3 × 12",
+            "Core: plank 30 sec + dead bug 3 × 10",
+            "Cool down: legs + calves stretch"
+          ];
+        }
+        if (dayType === "FullBody") {
+          return [
+            "Warm-up: 5 min mobility",
+            "Push-ups: 3 × 6",
+            "Pull-ups: 2 × 2–3",
+            "Dumbbell thrusters: 3 × 10",
+            "Core: side plank 20–25 sec each",
+            "Core: dead bug 3 × 10",
+            "Tech-neck: 5 min routine",
+            "Cool down: stretch"
+          ];
+        }
+      }
+
+      // Strength phase (Weeks 5–6)
+      if (phase === "strength") {
+        if (dayType === "Push") {
+          return [
+            "Warm-up (5–7 min): joints + neck",
+            "Push-ups: 3 × 8",
+            "Incline push-ups: 2 × 12",
+            "Beginner pike push-ups: 2 × 6",
+            "Bench dips: 3 × 10",
+            "Tech-neck: 2×15 chin tucks + wall angels",
+            "Cool down: chest, triceps, shoulders"
+          ];
+        }
+        if (dayType === "Pull") {
+          return [
+            "Warm-up: scapular pulls + arm swings",
+            "Pull-ups: 3 × 3–4",
+            "Assisted pull-ups: 2 × 5",
+            "Australian rows: 3 × 12",
+            "Dumbbell rows: 2 × 14",
+            "Bicep curls: 2 × 15",
+            "YT-W raises: 2 × 10",
+            "Cool down: lats + biceps stretch"
+          ];
+        }
+        if (dayType === "Legs") {
+          return [
+            "Warm-up: hip, ankle, hamstring mobility",
+            "Split squats: 3 × 10 each leg",
+            "Step-ups: 3 × 12 each leg",
+            "Glute bridges: 3 × 15",
+            "Standing calf raises: 4 × 20",
+            "Seated calf raises: 3 × 15",
+            "Single-leg calf raises: 2 × 12 each",
+            "Core: plank 30 sec + bird-dog 10 each",
+            "Cool down: legs & calves stretch"
+          ];
+        }
+        if (dayType === "FullBody") {
+          return [
+            "Warm-up: full body 5–7 min",
+            "Push-ups: 2 × 10",
+            "Pull-ups: 2 × 3",
+            "Dumbbell thrusters: 3 × 12",
+            "Core: plank 30 sec",
+            "Core: bird-dog 10 each side",
+            "Core: heel taps 20 reps",
+            "Tech-neck: 5 min routine",
+            "Cool down: stretch"
+          ];
+        }
+      }
+
+      // Rest day template
+      return [
+        "Light movement: 15–20 min easy walk",
+        "Tech-neck: 5 min (chin tucks, wall angels, chest stretch)",
+        "Calf + hamstring stretch: 5 min",
+        "Hydration check: at least ~2L water today",
+        "Sleep target: 7–9 hours, phone off 30 min before bed"
+      ];
+    }
+
+    function getMealTasksForDay(week, dayType) {
+      const { isTraining } = getDayInfo();
+      const base = [];
+
+      if (isTraining) {
+        base.push(
+          "Breakfast (Training): 1–2 Ragi Rotis + 3 eggs OR Ragi Roti + peanut chutney + banana",
+          "Mid-morning: handful of nuts + 1 safe fruit (avoid kiwi/guava)",
+          "Lunch: 2 Ragi Rotis + dal/chana/rajma + chicken/fish + green sabzi",
+          "Pre-workout: banana + dairy-free whey shake",
+          "Dinner: Ragi Roti OR rice + protein (chicken/fish/tofu) + mixed vegetables",
+          "Before bed: 1 date or small jaggery piece + warm water",
+          "Supplements today: iron + B12 + folate + Vitamin D (as per doctor/schedule)"
+        );
+      } else {
+        base.push(
+          "Breakfast (Rest): 1–2 Ragi Rotis + 2–3 eggs OR Ragi Roti + peanut chutney + fruit",
+          "Mid-morning: nuts + 1 safe fruit",
+          "Lunch: 2 Ragi Rotis + dal/chana/rajma + chicken/fish + green sabzi",
+          "Evening snack: banana OR fruit + nuts (whey optional on rest day)",
+          "Dinner: Ragi Roti OR rice + protein (chicken/fish/tofu) + vegetables",
+          "Before bed: 1 date or small jaggery piece + warm water",
+          "Supplements today: iron + B12 + folate + Vitamin D (as per doctor/schedule)"
+        );
+      }
+
+      // Extra meta tasks (always at bottom):
+      base.push(
+        "Calorie goal ~2300–2500 reached today?",
+        "Stamina check-in: mentally rate energy 1–10"
+      );
+
+      return base;
+    }
+
+    function getDefaultsForToday(week) {
+      const dayInfo = getDayInfo();
+      const workout = makeTasksFromArray(getWorkoutTasksForDay(week, dayInfo.type));
+      const meals = makeTasksFromArray(getMealTasksForDay(week, dayInfo.type));
+      return { workout, meals };
+    }
+
+    function splitTasks(tasks) {
+      const firstIncompleteIndex = tasks.findIndex(t => !t.done);
+      if (firstIncompleteIndex === -1) {
+        return { completed: tasks, current: null, next: null };
+      }
+      const completed = tasks.slice(0, firstIncompleteIndex);
+      const current = tasks[firstIncompleteIndex];
+      const next = tasks[firstIncompleteIndex + 1] || null;
+      return { completed, current, next };
+    }
+
+    // ---- APP STATE ----
+    let state = loadState();
+    let cheatLog = loadCheatLog();
+    let currentTab = "workout";
+
+    const todayText = document.getElementById("todayText");
+    const weekText = document.getElementById("weekText");
+    const planLabel = document.getElementById("planLabel");
+    const content = document.getElementById("content");
+    const resetBtn = document.getElementById("resetDayBtn");
+    const decWeekBtn = document.getElementById("decWeekBtn");
+    const incWeekBtn = document.getElementById("incWeekBtn");
+    const tabButtons = Array.from(document.querySelectorAll(".tab"));
+
+    function renderWorkoutOrMeals(tabName) {
+      const tasks = tabName === "workout" ? state.workout : state.meals;
+      const { completed, current, next } = splitTasks(tasks);
+
+      let html = "";
+
+      // Completed
+      html += `<div>
+        <div class="section-label">Completed</div>`;
+      if (completed.length === 0) {
+        html += `<div class="small-text">Nothing done yet. Start with the big task below 👇</div>`;
+      } else {
+        html += `<div class="pill-list">` +
+          completed.map(t => `<div class="pill done">✓ ${t.text}</div>`).join("") +
+          `</div>`;
+      }
+      html += `</div>`;
+
+      // Current
+      html += `<div style="margin-top:10px;margin-bottom:10px;">`;
+      html += `<div class="section-label">${tabName === "workout" ? "Current Workout Task" : "Current Meal Task"}</div>`;
+      if (!current) {
+        html += `<div class="current-card">
+          <h2>All tasks complete 🎉</h2>
+          <div class="current-meta">
+            <span class="small-text">Amazing. You finished today’s ${tabName} plan.</span>
+            <span class="tag good">Done</span>
+          </div>
+        </div>`;
+      } else {
+        const index = tasks.findIndex(t => t === current);
+        html += `<div class="current-card">
+          <h2>${current.text}</h2>
+          <div class="current-meta">
+            <span>Step ${index + 1} of ${tasks.length}</span>
+            <span class="tag">${tabName === "workout" ? "Workout" : "Meal"}</span>
+          </div>
+          <button class="btn" id="markDoneBtn">Mark Done ✓</button>
+        </div>`;
+      }
+      html += `</div>`;
+
+      // Next
+      html += `<div>`;
+      html += `<div class="section-label">Next</div>`;
+      if (!next) {
+        html += `<div class="empty-state">
+          No more ${tabName === "workout" ? "exercises" : "meals"} left today. 
+          Rest, recover, hydrate 🧘‍♂️
+        </div>`;
+      } else {
+        html += `<div class="next-card">
+          <h3>${next.text}</h3>
+          <p class="small-text">${
+            tabName === "workout"
+              ? "Coming up after you finish the current task."
+              : "Upcoming meal or habit for later today."
+          }</p>
+        </div>`;
+      }
+      html += `</div>`;
+
+      content.innerHTML = html;
+
+      const markBtn = document.getElementById("markDoneBtn");
+      if (markBtn && current) {
+        markBtn.addEventListener("click", () => {
+          const tasksRef = tabName === "workout" ? state.workout : state.meals;
+          const idx = tasksRef.findIndex(t => !t.done);
+          if (idx !== -1) {
+            tasksRef[idx].done = true;
+            saveState(state);
+            renderTab(tabName);
+          }
+        });
+      }
+    }
+
+    function renderCheats() {
+      const todayKey = getTodayKey();
+      const todayUsed = !!cheatLog[todayKey];
+      const usedThisWeek = countCheatsThisWeek(cheatLog);
+      const remaining = Math.max(0, 2 - usedThisWeek);
+      const weekId = getYearWeekString();
+
+      let html = "";
+
+      html += `<div class="cheat-summary">
+        Weekly cheat limit: <strong>2 days/week</strong><br/>
+        Current week: <code>${weekId}</code><br/>
+        Used this week: <strong>${usedThisWeek}</strong> • Remaining: <strong>${remaining}</strong>
+      </div>`;
+
+      html += `<div class="cheat-badges">`;
+      html += `<span class="tag ${remaining > 0 ? "good" : "bad"}">${
+        remaining > 0 ? "Cheats available" : "Limit reached"
+      }</span>`;
+      if (todayUsed) {
+        html += `<span class="tag good">Today marked as cheat day ✅</span>`;
+      } else {
+        html += `<span class="tag">Today not a cheat day</span>`;
+      }
+      html += `</div>`;
+
+      html += `<div style="margin-bottom:10px;">
+        <button class="btn ${todayUsed ? "secondary" : ""}" id="toggleCheatBtn">
+          ${todayUsed ? "Undo cheat for today" : "Mark today as cheat day 🍟"}
+        </button>
+      </div>`;
+
+      html += `<div class="cheat-list">
+        <div class="section-label">What counts as a cheat day?</div>
+        <p class="small-text">
+          A day where you enjoy <strong>1–2 items</strong> like samosa, pakora, jalebi, rasmalai, gulab jamun, etc.
+          For your low BMI and weight-gain goal, this is totally fine 1–2× per week.
+        </p>
+        <ul>
+          <li>Best time: after lunch or in the evening.</li>
+          <li>Avoid: totally empty stomach, or right before bed (for deep-fried).</li>
+          <li>Examples:
+            <ul>
+              <li>1 samosa + chai</li>
+              <li>6–8 pakora pieces</li>
+              <li>1 bowl rasmalai (1–2 pcs)</li>
+              <li>1 gulab jamun + proper meal</li>
+            </ul>
+          </li>
+        </ul>
+      </div>`;
+
+      content.innerHTML = html;
+
+      const toggleCheatBtn = document.getElementById("toggleCheatBtn");
+      toggleCheatBtn.addEventListener("click", () => {
+        const current = !!cheatLog[todayKey];
+        if (current) {
+          // undo
+          delete cheatLog[todayKey];
+        } else {
+          // mark as cheat day
+          cheatLog[todayKey] = true;
+        }
+        saveCheatLog(cheatLog);
+        renderTab("cheats");
+      });
+    }
+
+    function renderTab(tabName) {
+      currentTab = tabName;
+      tabButtons.forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === tabName);
+      });
+
+      if (tabName === "workout" || tabName === "meals") {
+        renderWorkoutOrMeals(tabName);
+      } else if (tabName === "cheats") {
+        renderCheats();
+      }
+    }
+
+    function render() {
+      const info = getDayInfo();
+      todayText.textContent = formatToday();
+      weekText.textContent = `Week ${state.week} of 6`;
+      planLabel.textContent = info.label;
+      renderTab(currentTab);
+    }
+
+    // ---- EVENT LISTENERS ----
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        renderTab(btn.dataset.tab);
+      });
+    });
+
+    resetBtn.addEventListener("click", () => {
+      if (!confirm("Reset today’s progress and reload today’s plan?")) return;
+      const todayKey = getTodayKey();
+      const defaults = getDefaultsForToday(state.week);
+      state = {
+        date: todayKey,
+        week: state.week,
+        workout: defaults.workout,
+        meals: defaults.meals
+      };
+      saveState(state);
+      render();
+    });
+
+    decWeekBtn.addEventListener("click", () => {
+      if (state.week <= MIN_WEEK) return;
+      const newWeek = state.week - 1;
+      if (!confirm(`Switch to Week ${newWeek}? This will reset today’s tasks.`)) return;
+      state.week = newWeek;
+      const todayKey = getTodayKey();
+      const defaults = getDefaultsForToday(state.week);
+      state.date = todayKey;
+      state.workout = defaults.workout;
+      state.meals = defaults.meals;
+      saveState(state);
+      render();
+    });
+
+    incWeekBtn.addEventListener("click", () => {
+      if (state.week >= MAX_WEEK) return;
+      const newWeek = state.week + 1;
+      if (!confirm(`Switch to Week ${newWeek}? This will reset today’s tasks.`)) return;
+      state.week = newWeek;
+      const todayKey = getTodayKey();
+      const defaults = getDefaultsForToday(state.week);
+      state.date = todayKey;
+      state.workout = defaults.workout;
+      state.meals = defaults.meals;
+      saveState(state);
+      render();
+    });
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
