@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Segment Analytics.js Playground</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #111827;
+      --card-alt: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56,189,248,0.2);
+      --border: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --error: #f97373;
+      --success: #4ade80;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                   "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 45%, #000 100%);
+      color: var(--text);
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-weight: 600;
+    }
+
+    h1 {
+      font-size: 1.7rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h1 span.badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+    }
+
+    p {
+      margin-top: 4px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 2fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: linear-gradient(145deg, var(--card-bg), var(--card-alt));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px 16px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.45);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .pill {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.1);
+      color: var(--muted);
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .row > * {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.9);
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-soft);
+    }
+
+    textarea {
+      min-height: 70px;
+      max-height: 260px;
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: #0b1120;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px rgba(56,189,248,0.35);
+      background: #0ea5e9;
+    }
+
+    .btn.secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .btn.secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-soft);
+    }
+
+    .btn.inline {
+      margin-left: 8px;
+    }
+
+    .status {
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+
+    .dot.ok {
+      background: var(--success);
+    }
+
+    .dot.bad {
+      background: var(--error);
+    }
+
+    #log {
+      background: #020617;
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 0.78rem;
+      max-height: 260px;
+      overflow: auto;
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      border: 1px solid var(--border);
+    }
+
+    .log-line {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .log-line span.ts {
+      color: var(--muted);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      margin-right: 4px;
+      background: rgba(15,118,110,0.25);
+      color: #5eead4;
+    }
+
+    .tag.error {
+      background: rgba(185,28,28,0.25);
+      color: #fecaca;
+    }
+
+    .tag.ok {
+      background: rgba(22,163,74,0.25);
+      color: #bbf7d0;
+    }
+
+    .small {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      margin: 10px 0 6px;
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <header class="card" style="margin-bottom: 12px;">
+    <div class="card-header">
+      <div>
+        <h1>Segment Analytics.js Playground <span class="badge">Lab</span></h1>
+        <p>Load Analytics.js with any write key and fire all supported calls, plus custom payloads.</p>
+      </div>
+      <div style="text-align: right;">
+        <div class="status" id="status-line">
+          <span class="dot" id="status-dot"></span>
+          <span id="status-text">Not initialized</span>
+        </div>
+        <div class="small" id="writekey-label"></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="writeKey">Write Key</label>
+        <input id="writeKey" placeholder="eg. YOUR_WRITE_KEY_HERE" />
+        <div class="hint">This will load <code>analytics.js</code> from Segment CDN just for this page.</div>
+      </div>
+      <div style="flex: 0 0 auto; align-self: flex-end; display: flex; gap: 8px;">
+        <button class="btn" id="init-btn">Initialize Analytics.js</button>
+        <button class="btn secondary" id="page-btn">Send Page() on load</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT: Standard calls -->
+    <section class="card">
+      <div class="card-header">
+        <h2>Standard Calls</h2>
+        <span class="pill">identify / track / page / group / alias / screen</span>
+      </div>
+
+      <!-- Identify -->
+      <div class="section-title">Identify</div>
+      <div class="row">
+        <div>
+          <label for="identify-user-id">userId</label>
+          <input id="identify-user-id" placeholder="eg. user_123" />
+        </div>
+        <div>
+          <label for="identify-traits">traits (JSON)</label>
+          <textarea id="identify-traits" placeholder='{"email": "user@example.com", "plan": "pro"}'></textarea>
+        </div>
+      </div>
+      <button class="btn" id="identify-btn">Send Identify</button>
+
+      <!-- Track -->
+      <div class="section-title">Track</div>
+      <div class="row">
+        <div>
+          <label for="track-event">event</label>
+          <input id="track-event" placeholder="eg. Button Clicked" />
+        </div>
+        <div>
+          <label for="track-props">properties (JSON)</label>
+          <textarea id="track-props" placeholder='{"buttonName": "Signup", "location": "Hero"}'></textarea>
+        </div>
+      </div>
+      <button class="btn" id="track-btn">Send Track</button>
+
+      <!-- Page -->
+      <div class="section-title">Page</div>
+      <div class="row">
+        <div>
+          <label for="page-name">name</label>
+          <input id="page-name" placeholder="eg. Pricing" />
+        </div>
+        <div>
+          <label for="page-category">category (optional)</label>
+          <input id="page-category" placeholder="eg. Marketing" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="page-props">properties (JSON)</label>
+          <textarea id="page-props" placeholder='{"referrer": "email_campaign"}'></textarea>
+        </div>
+      </div>
+      <button class="btn" id="page-call-btn">Send Page</button>
+
+      <!-- Group -->
+      <div class="section-title">Group</div>
+      <div class="row">
+        <div>
+          <label for="group-id">groupId</label>
+          <input id="group-id" placeholder="eg. org_42" />
+        </div>
+        <div>
+          <label for="group-traits">traits (JSON)</label>
+          <textarea id="group-traits" placeholder='{"name": "Acme Inc", "plan": "enterprise"}'></textarea>
+        </div>
+      </div>
+      <button class="btn" id="group-btn">Send Group</button>
+
+      <!-- Alias -->
+      <div class="section-title">Alias</div>
+      <div class="row">
+        <div>
+          <label for="alias-user-id">new userId</label>
+          <input id="alias-user-id" placeholder="eg. user_123" />
+        </div>
+        <div>
+          <label for="alias-prev-id">previousId</label>
+          <input id="alias-prev-id" placeholder="eg. anon_abc" />
+        </div>
+      </div>
+      <button class="btn" id="alias-btn">Send Alias</button>
+
+      <!-- Screen (for completeness) -->
+      <div class="section-title">Screen (if supported)</div>
+      <div class="row">
+        <div>
+          <label for="screen-name">name</label>
+          <input id="screen-name" placeholder="eg. Settings" />
+        </div>
+        <div>
+          <label for="screen-props">properties (JSON)</label>
+          <textarea id="screen-props" placeholder='{"source": "nav"}'></textarea>
+        </div>
+      </div>
+      <button class="btn" id="screen-btn">Send Screen</button>
+    </section>
+
+    <!-- RIGHT: Custom calls & log -->
+    <section class="card">
+      <div class="card-header">
+        <h2>Custom Call Builder</h2>
+        <span class="pill">Advanced</span>
+      </div>
+
+      <p class="small">
+        Build any Analytics.js call by choosing a method and passing args as JSON.
+        Useful for edge-case testing.
+      </p>
+
+      <div class="row">
+        <div>
+          <label for="custom-method">Method</label>
+          <select id="custom-method">
+            <option value="track">track</option>
+            <option value="identify">identify</option>
+            <option value="page">page</option>
+            <option value="group">group</option>
+            <option value="alias">alias</option>
+            <option value="screen">screen</option>
+            <option value="custom">custom (analytics[&quot;...&quot;])</option>
+          </select>
+        </div>
+        <div>
+          <label for="custom-name">Method name (for custom)</label>
+          <input id="custom-name" placeholder='eg. "ready" or "reset"' />
+          <div class="hint">Only used if Method = custom.</div>
+        </div>
+      </div>
+
+      <label for="custom-args">Arguments (JSON array)</label>
+      <textarea id="custom-args" placeholder='eg. ["Product Viewed", {"id": "sku_123", "price": 42}]'></textarea>
+      <div class="hint">
+        This will be used like: <code>analytics[method](...args)</code>. Make sure this is a valid JSON array.
+      </div>
+
+      <button class="btn" id="custom-btn" style="margin-top: 6px;">Send Custom Call</button>
+
+      <hr style="border: none; border-top: 1px solid var(--border); margin: 12px 0;" />
+
+      <div class="card-header" style="margin-bottom: 4px;">
+        <h3 style="font-size: 0.95rem;">Event Log</h3>
+        <div>
+          <button class="btn secondary btn-sm" id="clear-log-btn">Clear</button>
+        </div>
+      </div>
+      <div id="log"></div>
+      <div class="hint" style="margin-top: 5px;">
+        This is just a UI log. For network details, use your browser DevTools → Network → filter by <code>segment</code> / <code>v1</code>.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const statusDot = document.getElementById("status-dot");
+    const statusText = document.getElementById("status-text");
+    const writeKeyLabel = document.getElementById("writekey-label");
+    const logEl = document.getElementById("log");
+
+    function setStatus(ok, text) {
+      if (ok === null) {
+        statusDot.className = "dot";
+      } else if (ok) {
+        statusDot.className = "dot ok";
+      } else {
+        statusDot.className = "dot bad";
+      }
+      statusText.textContent = text;
+    }
+
+    function appendLog(type, message, payload) {
+      const line = document.createElement("div");
+      line.className = "log-line";
+
+      const ts = new Date().toISOString().split("T");
+      const timeStr = ts[0] + " " + ts[1].replace("Z", "");
+      const tagSpan = document.createElement("span");
+      tagSpan.className = "tag" + (type === "error" ? " error" : type === "ok" ? " ok" : "");
+      tagSpan.textContent = type.toUpperCase();
+
+      const tsSpan = document.createElement("span");
+      tsSpan.className = "ts";
+      tsSpan.textContent = " " + timeStr + " – ";
+
+      const msgSpan = document.createElement("span");
+      msgSpan.textContent = message;
+
+      line.appendChild(tagSpan);
+      line.appendChild(tsSpan);
+      line.appendChild(msgSpan);
+
+      if (payload !== undefined) {
+        const payloadPre = document.createElement("pre");
+        payloadPre.style.margin = "4px 0 6px 0";
+        payloadPre.textContent = typeof payload === "string"
+          ? payload
+          : JSON.stringify(payload, null, 2);
+        line.appendChild(payloadPre);
+      }
+
+      logEl.prepend(line);
+    }
+
+    function getAnalytics() {
+      if (!window.analytics || typeof window.analytics !== "object") {
+        appendLog("error", "analytics.js not loaded yet. Initialize first.");
+        alert("analytics.js not loaded yet. Initialize first.");
+        return null;
+      }
+      return window.analytics;
+    }
+
+    // Initialize analytics.js dynamically from CDN using the write key
+    document.getElementById("init-btn").addEventListener("click", () => {
+      const writeKey = document.getElementById("writeKey").value.trim();
+      if (!writeKey) {
+        alert("Please enter a write key first.");
+        return;
+      }
+
+      if (window.__segmentLoadedForKey === writeKey) {
+        appendLog("info", "analytics.js already loaded for this write key.");
+        setStatus(true, "Initialized (cached)");
+        writeKeyLabel.textContent = "Write key: " + writeKey;
+        return;
+      }
+
+      // Remove previous script if any (simple version)
+      const existing = document.querySelector('script[data-segment-loader="true"]');
+      if (existing) {
+        existing.remove();
+        appendLog("info", "Removed previous analytics.js script tag.");
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://cdn.segment.com/analytics.js/v1/" + encodeURIComponent(writeKey) + "/analytics.min.js";
+      script.async = true;
+      script.dataset.segmentLoader = "true";
+
+      script.onload = () => {
+        window.__segmentLoadedForKey = writeKey;
+        appendLog("ok", "analytics.js loaded successfully.", { writeKey });
+        setStatus(true, "Initialized");
+        writeKeyLabel.textContent = "Write key: " + writeKey;
+        try {
+          // Optional: a test ping
+          if (window.analytics && typeof window.analytics.page === "function") {
+            window.analytics.page("Playground Loaded");
+            appendLog("info", "Sent initial page('Playground Loaded') after init.");
+          }
+        } catch (err) {
+          appendLog("error", "Error sending initial page call: " + err.message);
+        }
+      };
+
+      script.onerror = () => {
+        appendLog("error", "Failed to load analytics.js from CDN.");
+        setStatus(false, "Failed to load analytics.js");
+      };
+
+      document.head.appendChild(script);
+      setStatus(null, "Loading analytics.js…");
+      appendLog("info", "Loading analytics.js from CDN…", { src: script.src });
+    });
+
+    // Extra manual page() button using current inputs
+    document.getElementById("page-btn").addEventListener("click", () => {
+      const analytics = getAnalytics();
+      if (!analytics) return;
+      try {
+        analytics.page();
+        appendLog("ok", "Sent bare analytics.page().");
+      } catch (err) {
+        appendLog("error", "Error calling page(): " + err.message);
+      }
+    });
+
+    // Identify
+    document.getElementById("identify-btn").addEventListener("click", () => {
+      const analytics = getAnalytics();
+      if (!analytics) return;
+
+      const userId = document.getElementById("identify-user-id").value.trim();
+      const traitsRaw = document.getElementById("identify-traits").value.trim();
+      let traits = undefined;
+
+      if (traitsRaw) {
+        try {
+          traits = JSON.parse(traitsRaw);
+        } catch (err) {
+          appendLog("error", "Invalid JSON in Identify traits: " + err.message, traitsRaw);
+          alert("Invalid JSON in Identify traits. Check console/log.");
+          return;
+        }
+      }
+
+      try {
+        if (userId && traits) {
+          analytics.identify(userId, traits);
+        } else if (userId) {
+          analytics.identify(userId);
+        } else if (traits) {
+          analytics.identify(traits);
+        } else {
+          analytics.identify();
+        }
+        appendLog("ok", "identify() called", { userId, traits });
+      } catch (err) {
+        appendLog("error", "Error calling identify(): " + err.message);
+      }
+    });
+
+    // Track
+    document.getElementById("track-btn").addEventListener("click", () => {
+      const analytics = getAnalytics();
+      if (!analytics) return;
+
+      const eventName = document.getElementById("track-event").value.trim() || "Test Event";
+      const propsRaw = document.getElementById("track-props").value.trim();
+      let properties = undefined;
+
+      if (propsRaw) {
+        try {
+          properties = JSON.parse(propsRaw);
+        } catch (err) {
+          appendLog("error", "Invalid JSON in Track properties: " + err.message, propsRaw);
+          alert("Invalid JSON in Track properties. Check console/log.");
+          return;
+        }
+      }
+
+      try {
+        if (properties) {
+          analytics.track(eventName, properties);
+        } else {
+          analytics.track(eventName);
+        }
+        appendLog("ok", "track() called", { event: eventName, properties });
+      } catch (err) {
+        appendLog("error", "Error calling track(): " + err.message);
+      }
+    });
+
+    // Page
+    document.getElementById("page-call-btn").addEventListener("click", () => {
+      const analytics = getAnalytics();
+      if (!analytics) return;
+
+      const name = document.getElementById("page-name").value.trim();
+      const category = document.getElementById("page-category").value.trim();
+      const propsRaw = document.getElementById("page-props").value.trim();
+      let properties = undefined;
+
+      if (propsRaw) {
+        try {
+          properties = JSON.parse(propsRaw);
+        } catch (err) {
+          appendLog("error", "Invalid JSON in Page properties: " + err.message, propsRaw);
+          alert("Invalid JSON in Page properties. Check console/log.");
+          return;
+        }
+      }
+
+      try {
+        let args = [];
+        if (category) args.push(category);
+        if (name) args.push(name);
+        if (properties) args.push(properties);
+
+        if (args.length === 0) {
+          analytics.page();
+          appendLog("ok", "page() called (no args).");
+        } else {
+          analytics.page.apply(analytics, args);
+          appendLog("ok", "page() called with args", args);
+        }
+      } catch (err) {
+        appendLog("error", "Error calling page(): " + err.message);
+      }
+    });
+
+    // Group
+    document.getElementById("group-btn").addEventListener("click", () => {
+      const analytics = getAnalytics();
+      if (!analytics) return;
+
+      const groupId = document.getElementById("group-id").value.trim();
+      const traitsRaw = document.getElementById("group-traits").value.trim();
+      let traits = undefined;
+
+      if (traitsRaw) {
+        try {
+          traits = JSON.parse(traitsRaw);
+        } catch (err) {
+          appendLog("error", "Invalid JSON in Group traits: " + err.message, traitsRaw);
+          alert("Invalid JSON in Group traits. Check console/log.");
+          return;
+        }
+      }
+
+      try {
+        if (groupId && traits) {
+          analytics.group(groupId, traits);
+        } else if (groupId) {
+          analytics.group(groupId);
+        } else {
+          analytics.group();
+        }
+        appendLog("ok", "group() called", { groupId, traits });
+      } catch (err) {
+        appendLog("error", "Error calling group(): " + err.message);
+      }
+    });
+
+    // Alias
+    document.getElementById("alias-btn").addEventListener("click", () => {
+      const analytics = getAnalytics();
+      if (!analytics) return;
+
+      const newId = document.getElementById("alias-user-id").value.trim();
+      const prevId = document.getElementById("alias-prev-id").value.trim();
+
+      try {
+        if (newId && prevId) {
+          analytics.alias(newId, { previousId: prevId });
+          appendLog("ok", "alias() called with newId + previousId option", { newId, previousId: prevId });
+        } else if (newId) {
+          analytics.alias(newId);
+          appendLog("ok", "alias() called with newId", { newId });
+        } else {
+          analytics.alias();
+          appendLog("ok", "alias() called (no args).");
+        }
+      } catch (err) {
+        appendLog("error", "Error calling alias(): " + err.message);
+      }
+    });
+
+    // Screen
+    document.getElementById("screen-btn").addEventListener("click", () => {
+      const analytics = getAnalytics();
+      if (!analytics) return;
+
+      const name = document.getElementById("screen-name").value.trim();
+      const propsRaw = document.getElementById("screen-props").value.trim();
+      let properties = undefined;
+
+      if (propsRaw) {
+        try {
+          properties = JSON.parse(propsRaw);
+        } catch (err) {
+          appendLog("error", "Invalid JSON in Screen properties: " + err.message, propsRaw);
+          alert("Invalid JSON in Screen properties. Check console/log.");
+          return;
+        }
+      }
+
+      try {
+        if (name && properties) {
+          analytics.screen(name, properties);
+        } else if (name) {
+          analytics.screen(name);
+        } else {
+          analytics.screen();
+        }
+        appendLog("ok", "screen() called", { name, properties });
+      } catch (err) {
+        appendLog("error", "Error calling screen(): " + err.message);
+      }
+    });
+
+    // Custom call builder
+    document.getElementById("custom-btn").addEventListener("click", () => {
+      const analytics = getAnalytics();
+      if (!analytics) return;
+
+      const methodSelect = document.getElementById("custom-method");
+      const methodValue = methodSelect.value;
+      const customNameInput = document.getElementById("custom-name").value.trim();
+      const argsRaw = document.getElementById("custom-args").value.trim() || "[]";
+
+      let args;
+      try {
+        args = JSON.parse(argsRaw);
+        if (!Array.isArray(args)) {
+          throw new Error("Arguments must be a JSON array.");
+        }
+      } catch (err) {
+        appendLog("error", "Invalid JSON in custom args: " + err.message, argsRaw);
+        alert("Invalid JSON in custom args. Must be an array.");
+        return;
+      }
+
+      let methodName = methodValue;
+      if (methodValue === "custom") {
+        if (!customNameInput) {
+          alert("When method is 'custom', you must provide a method name.");
+          return;
+        }
+        methodName = customNameInput;
+      }
+
+      const fn = analytics[methodName];
+      if (typeof fn !== "function") {
+        appendLog("error", "analytics[\"" + methodName + "\"] is not a function.", args);
+        alert("analytics[\"" + methodName + "\"] is not a function.");
+        return;
+      }
+
+      try {
+        fn.apply(analytics, args);
+        appendLog("ok", "Custom call: analytics[\"" + methodName + "\"](...args)", args);
+      } catch (err) {
+        appendLog("error", "Error in custom call: " + err.message, args);
+      }
+    });
+
+    // Clear log
+    document.getElementById("clear-log-btn").addEventListener("click", () => {
+      logEl.innerHTML = "";
+    });
+
+    // Initial status
+    setStatus(null, "Not initialized");
+  </script>
+</body>
+</html>
