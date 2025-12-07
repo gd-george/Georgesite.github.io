@@ -1,27 +1,291 @@
-<!DOCTYPE html> 
-<html> 
-<head> 
-    <title>Home Questionnaire</title> <span id="selection-marker-1" class="redactor-selection-marker"></span>
-</head> 
-<body> 
-<h1>What is your favorite place to travel?</h1> 
-<p>I am building a directory of the sweetest travel destinations.</p>  
-<form name="travel" onsubmit="identify(event)">
-     What is your favorite travel destination?
-    <input name="destination" required="" size="81" type="text"/> 
-    <br><br><br> 
-    Any recommendations (cool things to do, places to visit or restaurants to eat)? 
-    <br><br> 
-    <textarea cols="81" name="details" required="" rows="10">
-    </textarea> 
-    <br><br> 
-    Name: <input name="fullname" required="" size="75" type="text"/> 
-    <br><br> 
-    Email: <input name="email" required="" size="75" type="email"/> 
-    <br><br>
-    <input name="submit" type="submit" value="submit"/>
-</form> 
- <!--  Div Below is where consent manager will be injected to  -->
-  <div id="target-container"></div>
-</body> 
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Segment Consent Manager Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f7f7f7;
+      }
+      header {
+        background: #111827;
+        color: #f9fafb;
+        padding: 1rem 1.5rem;
+      }
+      main {
+        padding: 1.5rem;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .card {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        margin-bottom: 1.5rem;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+        border: 1px solid #d1d5db;
+        font: inherit;
+      }
+      button {
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        padding: 0.6rem 1.1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      button:hover {
+        background: #1d4ed8;
+      }
+      #target-container {
+        margin-bottom: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Segment Consent Manager Demo</h1>
+    </header>
+
+    <main>
+      <div id="target-container"></div>
+
+      <div class="card">
+        <h2>Demo form (sends Segment events)</h2>
+        <p>
+          This form will call <code>identify</code>,
+          <code>track</code>, <code>page</code>, <code>alias</code>, and
+          <code>group</code> via <code>analytics.js</code>. What actually fires
+          for each destination will depend on your consent preferences.
+        </p>
+
+        <form id="demo-form" onsubmit="identify(event)">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required />
+
+          <label for="fullname">Full name</label>
+          <input id="fullname" name="fullname" type="text" required />
+
+          <label for="destination">Destination name</label>
+          <input
+            id="destination"
+            name="destination"
+            type="text"
+            placeholder="e.g. Google Analytics"
+          />
+
+          <label for="details">Details</label>
+          <textarea
+            id="details"
+            name="details"
+            rows="3"
+            placeholder="Any extra context for your event..."
+          ></textarea>
+
+          <button type="submit">Send events via Segment</button>
+        </form>
+      </div>
+    </main>
+
+    <!-- 1) Load Analytics.js snippet FIRST so Consent Manager can use it -->
+    <script>
+      !(function() {
+        var analytics = (window.analytics = window.analytics || []);
+        if (!analytics.initialize)
+          if (analytics.invoked)
+            window.console &&
+              console.error &&
+              console.error("Segment snippet included twice.");
+          else {
+            analytics.invoked = !0;
+            analytics.methods = [
+              "trackSubmit",
+              "trackClick",
+              "trackLink",
+              "trackForm",
+              "pageview",
+              "identify",
+              "reset",
+              "group",
+              "track",
+              "ready",
+              "alias",
+              "debug",
+              "page",
+              "once",
+              "off",
+              "on",
+              // methods below needed for consent manager version 5.0.0 and greater!!
+              "addSourceMiddleware",
+              "addDestinationMiddleware",
+            ];
+            analytics.factory = function(t) {
+              return function() {
+                var e = Array.prototype.slice.call(arguments);
+                e.unshift(t);
+                analytics.push(e);
+                return analytics;
+              };
+            };
+            for (var t = 0; t < analytics.methods.length; t++) {
+              var e = analytics.methods[t];
+              analytics[e] = analytics.factory(e);
+            }
+            analytics.load = function(t, e) {
+              var n = document.createElement("script");
+              n.type = "text/javascript";
+              n.async = !0;
+              n.src =
+                ("https:" === document.location.protocol ? "https://" : "http://") +
+                "cdn.segment.com/analytics.js/v1/" +
+                t +
+                "/analytics.min.js";
+              var o = document.getElementsByTagName("script")[0];
+              o.parentNode.insertBefore(n, o);
+              analytics._loadOptions = e;
+            };
+            analytics.SNIPPET_VERSION = "4.1.0";
+
+            // IMPORTANT: Do NOT call analytics.load() manually when using the
+            // Prebuilt Consent Manager standalone bundle.
+            // Consent Manager will call analytics.load(writeKey) using the writeKey
+            // from window.consentManagerConfig().
+          }
+      })();
+    </script>
+
+    <!-- 2) Consent Manager config (uses your write key & categories) -->
+    <script>
+      window.consentManagerConfig = function(exports) {
+        //  Custom categories
+        var customCategories = {
+          Analytics: {
+            integrations: ["Google Analytics", "Mixpanel", "Amplitude"],
+            purpose:
+              "Provide statistical information on site usage, e.g., web analytics so we can improve this website over time.",
+          },
+          Functional: {
+            integrations: ["Salesforce Marketing Cloud", "Visual Tagger"],
+            purpose:
+              "Enables enhanced functionality, such as videos and live chat. If you do not allow these, then some or all of these functions may not work properly.",
+          },
+          "Do Not Sell": {
+            integrations: ["Salesforce", "MailChimp", "AdWords"],
+            purpose:
+              "To give the right to opt out of the sale of personal data.",
+          },
+        };
+
+        // Default preferences when banner first shows
+        var initialPrefs = {
+          Functional: true,
+          Analytics: false,
+          "Do Not Sell": false,
+        };
+
+        var prefs = {
+          // Where the consent UI should render
+          container: "#target-container",
+
+          // Custom categories & initial preferences
+          customCategories: customCategories,
+          initialPreferences: initialPrefs,
+
+          // ✅ Replace with your actual Segment write key
+          writeKey: "HwhLoZh1fCtwAiGxp2HWvK7oOkhdLBSF",
+
+          bannerContent:
+            "User consent is awesome! We use cookies (and other similar technologies) to collect data to improve your experience on our site.",
+          bannerSubContent: "You can change your preferences at any time.",
+          cancelDialogContent:
+            "Your preferences have not been saved. By continuing to use our website, you are agreeing to our Website Data Collection Policy.",
+          cancelDialogTitle: "Are you sure you want to cancel?",
+          closeBehavior: "accept",
+          implyConsentOnInteraction: false,
+          preferencesDialogContent:
+            "We use data collected by cookies and JavaScript libraries, which are necessary for website functioning, to improve user’s browsing experience, analyze site traffic, deliver personalized advertisements, and increase the overall performance of our site.",
+          preferencesDialogTitle: "Website Data Collection Preferences",
+        };
+
+        return prefs;
+      };
+    </script>
+
+    <!-- 3) Load the Prebuilt Consent Manager UI (Preact) -->
+    <script
+      src="https://unpkg.com/@segment/consent-manager@5.0.0/standalone/consent-manager.js"
+      defer
+    ></script>
+
+    <!-- 4) Form handler: send Identify/Track/Page/Alias/Group -->
+    <script>
+      function identify(e) {
+        e.preventDefault();
+
+        var form = e.target;
+        var email = form["email"].value;
+        var fullname = form["fullname"].value;
+        var destination = form["destination"].value;
+        var details = form["details"].value;
+
+        var user = {
+          email: email,
+          name: fullname,
+          destination: destination,
+          details: details,
+        };
+
+        // Identify the user
+        analytics.identify("1234", {
+          email: email,
+          name: fullname,
+        });
+
+        // Track a custom event
+        analytics.track("destination submitted", user, function() {
+          // Simple reload after track callback
+          window.location.href = window.location.pathname;
+        });
+
+        // Page call with properties
+        analytics.page(
+          "Home",
+          user,
+          {
+            url: "/",
+          }
+        );
+
+        // Alias + Group calls for demo
+        analytics.alias("507f191e81");
+
+        analytics.group("0e8c78ea9d97a7b8185e8632", {
+          name: "Initech",
+          industry: "Technology",
+          employees: 329,
+          plan: "enterprise",
+          "total billed": 830,
+        });
+      }
+    </script>
+  </body>
 </html>
