@@ -243,6 +243,43 @@
             color: #7ec699;
             font-weight: bold;
         }
+
+        .middleware-panel {
+            background: #f2f0fb;
+            border: 1px solid #d8d2f0;
+            border-radius: 4px;
+            padding: 12px 14px;
+            font-size: 12.5px;
+            color: #453a75;
+            margin-top: 16px;
+        }
+
+        .middleware-panel .middleware-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .middleware-panel .middleware-title input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .middleware-panel .middleware-desc {
+            color: #6b60a0;
+            margin: 4px 0 0;
+        }
+
+        .middleware-panel .middleware-status {
+            margin-top: 6px;
+            font-weight: 600;
+        }
+
+        .middleware-panel a {
+            color: #453a75;
+        }
     </style>
 
     <script>
@@ -288,6 +325,15 @@
             </form>
 
             <div class="messages" id="messages"></div>
+
+            <div class="middleware-panel">
+                <div class="middleware-title">
+                    <input type="checkbox" id="middlewareToggle" />
+                    <label for="middlewareToggle" style="margin:0; font-size:12.5px;">Enable Source Middleware</label>
+                </div>
+                <p class="middleware-desc">When enabled, a Source middleware runs on every call before it's sent and adds <code>context.middleware = true</code> to the payload — applies to all destinations, not just Device Mode ones. See the <a href="https://twilio-productivity.atlassian.net/wiki/spaces/CSEng/pages/721926367/Middlewares+Analytics.js" target="_blank" rel="noopener">internal Middlewares guide</a>.</p>
+                <div class="middleware-status" id="middlewareStatus"></div>
+            </div>
 
             <div class="log">
                 <h2>Call log</h2>
@@ -470,7 +516,41 @@
         var messagesEl = document.getElementById("messages");
         var logContainerEl = document.getElementById("logContainer");
         var examplesContainerEl = document.getElementById("examplesContainer");
+        var middlewareToggleEl = document.getElementById("middlewareToggle");
+        var middlewareStatusEl = document.getElementById("middlewareStatus");
         var form = document.getElementById("callForm");
+
+        // ---------------------------------------------------------------
+        // Source Middleware: runs on every call (identify/track/page/
+        // screen/group/alias) before it's sent to any destination —
+        // Cloud Mode or Device Mode. While the toggle is on, it adds
+        // context.middleware = true to the outgoing payload. Registered
+        // once at load; the toggle just flips whether it mutates.
+        // ---------------------------------------------------------------
+        var middlewareEnabled = false;
+
+        analytics.addSourceMiddleware(function (chain) {
+            var payload = chain.payload;
+            if (middlewareEnabled) {
+                payload.obj.context = payload.obj.context || {};
+                payload.obj.context.middleware = true;
+            }
+            chain.next(payload);
+        });
+
+        function renderMiddlewareStatus() {
+            middlewareStatusEl.textContent = middlewareEnabled
+                ? "Enabled — outgoing calls include context.middleware = true."
+                : "Disabled — payloads are sent unmodified.";
+            middlewareStatusEl.style.color = middlewareEnabled ? "#2e7d32" : "#6b60a0";
+        }
+
+        middlewareToggleEl.addEventListener("change", function (e) {
+            middlewareEnabled = e.target.checked;
+            renderMiddlewareStatus();
+        });
+
+        renderMiddlewareStatus();
 
         // Populate dropdown
         Object.keys(SPECS).forEach(function (type) {
@@ -622,7 +702,8 @@
             var entry = document.createElement("div");
             entry.className = "log-entry";
             var time = new Date().toLocaleTimeString();
-            entry.innerHTML = "<span class='tag'>[" + time + "] analytics." + type + "()</span>\n" + JSON.stringify(body, null, 2);
+            var middlewareNote = middlewareEnabled ? " (+ context.middleware=true via source middleware)" : "";
+            entry.innerHTML = "<span class='tag'>[" + time + "] analytics." + type + "()" + middlewareNote + "</span>\n" + JSON.stringify(body, null, 2);
             logContainerEl.insertBefore(entry, logContainerEl.firstChild);
         }
 
