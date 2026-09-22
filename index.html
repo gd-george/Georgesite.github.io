@@ -295,6 +295,14 @@
           }
         }
       }
+    },
+    // --- Cookie-only storage test (2026-09-22) ---
+    // Tells Analytics.js to use ONLY cookies for its own user/group
+    // persistence (ajs_user_id / ajs_user_traits / ajs_group_id /
+    // ajs_group_properties), skipping localStorage and memory entirely.
+    // Reference: https://www.twilio.com/docs/segment/connections/sources/catalog/libraries/website/javascript/cookie-validity-update#storage-priority
+    storage: {
+      stores: ["cookie"]
     }
   });
   analytics.page();
@@ -306,7 +314,7 @@
     <div class="layout">
         <div class="container">
             <h1>Analytics.js Call Tester</h1>
-            <p class="subtitle">Pick a call type, provide the body as JSON, and it'll be validated against the analytics.js spec before firing. Calls are batched natively by analytics.js (Segment.io deliveryStrategy: size 2, timeout 10s).</p>
+            <p class="subtitle">Pick a call type, provide the body as JSON, and it'll be validated against the analytics.js spec before firing. Calls are batched natively by analytics.js (Segment.io deliveryStrategy: size 2, timeout 10s). Storage config: cookie-only (no localStorage).</p>
 
             <form id="callForm">
                 <div class="form-group">
