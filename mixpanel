@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Mixpanel (Web) Actions – segment_source_name lab</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 820px; margin: 30px auto; padding: 0 16px; }
+  input { width: 360px; padding: 6px; }
+  button { padding: 6px 12px; margin: 4px 4px 4px 0; cursor: pointer; }
+  pre { background: #f4f4f4; padding: 12px; white-space: pre-wrap; word-break: break-all; font-size: 13px; }
+  .ok { color: #0a7a2f; font-weight: 600; } .bad { color: #b00020; font-weight: 600; }
+</style>
+</head>
+<body>
+<h2>Mixpanel (Web) Actions – segment_source_name lab</h2>
+<p>Write key: <input id="wk" placeholder="paste source write key"> <button onclick="start()">Load analytics.js</button></p>
+<button onclick="checkSettings()">1. Check CDN settings bundle</button>
+<button onclick="checkLoaded()">2. Check loaded bundle</button>
+<button onclick="checkProp()">3. Check super property</button>
+<button onclick="sendTrack()">4. Send test track</button>
+<pre id="out">Paste a write key and click Load. Serve via http://localhost (not file://).</pre>
+
+<script>
+const out = document.getElementById('out');
+function log(html) { out.innerHTML += '\n' + html; }
+const KNOWN = { 'a88c901fdd211ed121ac': 'OLD (no sourceName)', '711c4613ef46db04b155': 'NEW (has sourceName)' };
+function label(url) {
+  const m = (url || '').match(/mixpanel-web\/([a-f0-9]+)\.js/);
+  return m ? `${m[1]}  → ${KNOWN[m[1]] || 'unknown hash – compare manually'}` : '(none)';
+}
+
+// Pre-fill write key from ?wk= so a hard refresh keeps it
+const qs = new URLSearchParams(location.search);
+if (qs.get('wk')) document.getElementById('wk').value = qs.get('wk');
+
+function start() {
+  const wk = document.getElementById('wk').value.trim();
+  if (!wk) return alert('Write key needed');
+  if (qs.get('wk') !== wk) { location.search = '?wk=' + encodeURIComponent(wk); return; }
+  out.textContent = 'Loading analytics.js for ' + wk + ' …';
+  // Standard analytics.js snippet (trimmed)
+  !function(){var i="analytics",analytics=window[i]=window[i]||[];if(!analytics.initialize)if(analytics.invoked)return;else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","screen","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware","register"];analytics.factory=function(e){return function(){if(window[i].initialized)return window[i][e].apply(window[i],arguments);var n=Array.prototype.slice.call(arguments);n.unshift(e);analytics.push(n);return analytics}};for(var n=0;n<analytics.methods.length;n++){var key=analytics.methods[n];analytics[key]=analytics.factory(key)}analytics.load=function(key,n){var t=document.createElement("script");t.type="text/javascript";t.async=!0;t.src="https://cdn.segment.com/analytics.js/v1/"+key+"/analytics.min.js";var r=document.getElementsByTagName("script")[0];r.parentNode.insertBefore(t,r);analytics._loadOptions=n};analytics._writeKey=wk;analytics.SNIPPET_VERSION="5.2.0";
+  analytics.load(wk);
+  analytics.page();
+  }}();
+  analytics.ready(() => { log('<span class="ok">analytics.js ready</span>'); checkSettings(); setTimeout(() => { checkLoaded(); checkProp(); }, 1500); });
+}
+
+async function checkSettings() {
+  const wk = document.getElementById('wk').value.trim();
+  try {
+    const r = await fetch(`https://cdn.segment.com/v1/projects/${wk}/settings`, { cache: 'no-store' });
+    const s = await r.json();
+    const mp = (s.remotePlugins || []).filter(p => /mixpanel/i.test(p.url || p.name || ''));
+    if (!mp.length) return log('<span class="bad">No mixpanel remotePlugin in CDN settings (destination disabled / not saved?)</span>');
+    mp.forEach(p => {
+      log(`CDN settings bundle: ${label(p.url)}`);
+      const sn = (p.settings || {}).sourceName;
+      log(`CDN settings sourceName: ${sn ? '<span class="ok">' + sn + '</span>' : '<span class="bad">(not set)</span>'}`);
+    });
+  } catch (e) { log('<span class="bad">Settings fetch failed: ' + e + '</span>'); }
+}
+
+function checkLoaded() {
+  const urls = performance.getEntriesByType('resource').map(e => e.name).filter(u => u.includes('mixpanel-web'));
+  log('Browser actually loaded: ' + (urls.length ? urls.map(label).join(' | ') : '<span class="bad">no mixpanel-web bundle seen yet</span>'));
+}
+
+function checkProp() {
+  const mp = window.mixpanel;
+  if (!mp || typeof mp.get_property !== 'function') return log('<span class="bad">window.mixpanel not ready yet – retry in a sec</span>');
+  const v = mp.get_property('segment_source_name');
+  log('segment_source_name super property: ' + (v ? `<span class="ok">${v}</span>` : '<span class="bad">(not registered)</span>'));
+}
+
+function sendTrack() {
+  analytics.track('SourceName Lab Test', { ts: new Date().toISOString() });
+  log('Sent track "SourceName Lab Test" – check Mixpanel Live View for segment_source_name');
+}
+
+if (qs.get('wk')) start();
+</script>
+</body>
+</html>
